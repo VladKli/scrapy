@@ -1,9 +1,9 @@
 import datetime
-import time
 
 from selenium import webdriver
 import scrapy
 from selenium.webdriver.common.by import By
+from scrapy.http import HtmlResponse
 
 
 class AstatechincComSpider(scrapy.Spider):
@@ -11,10 +11,12 @@ class AstatechincComSpider(scrapy.Spider):
     allowed_domains = ["astatechinc.com"]
     start_urls = []
     base_url = 'https://www.astatechinc.com/CATALOG.php'
+    driver = webdriver.Chrome()
 
     def __init__(self, *args, **kwargs):
         super(AstatechincComSpider, self).__init__(*args, **kwargs)
         self.start_urls = self.get_start_urls()
+        # self.driver = webdriver.Chrome(service=Service('/path/to/chromedriver'))
 
     def get_start_urls(self):
         categories_names = []
@@ -38,12 +40,15 @@ class AstatechincComSpider(scrapy.Spider):
             a_tag_texts = [a_tag.text for a_tag in a_tags]
             for sub_category in a_tag_texts:
                 categories_urls.append(self.get_subcategory_url(driver, el, sub_category))
-            print('done')
 
         for el in another_categories:
             category = driver.find_element(By.XPATH, f'//*[contains(text(), "{el}")]')
             driver.execute_script("arguments[0].click();", category)
             categories_urls.append(driver.current_url)
+
+        all_pages = self.get_all_pages(driver, categories_urls)
+
+        categories_urls = list(set(categories_urls + all_pages))
 
         driver.quit()
 
@@ -59,35 +64,74 @@ class AstatechincComSpider(scrapy.Spider):
         return driver.current_url
 
     def parse(self, response):
+        table = response.xpath("/html/body/div[9]/div[2]/div[5]/table[1]")
+        a_tags = table.xpath(".//a")
+
+        for link in a_tags:
+            href = link.xpath("@href").get()
+            yield scrapy.Request(url=href, callback=self.parse_link)
+
+    def parse_link(self, response):
         qt_list = []
         unit_list = []
         currency_list = []
         price_pack_list = []
         n = 1
 
-        availability = response.xpath('//*[contains(text(), "Ready to ship within 24 hours")]').get()
+        self.driver.get(response.url)
+        page_source = self.driver.page_source
 
-        tr_tags = response.xpath('//tr[.//span[contains(text(), "Please enter Qty to check availability")]]')
-        for _ in tr_tags:
+        response = HtmlResponse(url=response.url, body=page_source, encoding='utf-8')
+        try:
+            numcas = response.xpath('//td[contains(text(), "CAS")]/following-sibling::td[1]/text()').get()
+            if not numcas:
+                return None
 
-            qt_and_unit = response.xpath(f'//span[@id="su{n}"]/text()').get().split('/')
-            currency = response.xpath('//td[contains(text(), "Price")]/text()').get().split('(')[-1].replace(')', '')
-            price = response.xpath(f'//input[@id="UnitPrice{n}"]/@value').get()
-            qt_list.append(qt_and_unit[0])
-            unit_list.append(qt_and_unit[1])
-            currency_list.append(currency)
-            price_pack_list.append(price)
-            n += 1
+            availability = response.xpath('//*[contains(text(), "Ready to ship within 24 hours")]').get()
 
-        yield {
-            'datetime': datetime.datetime.now(),
-            'availability': True if availability else False,
-            'company_name': 'AstaTech',
-            'product_url': None,
-            'numcas': response.xpath('//td[contains(text(), "CAS")]/following-sibling::td[1]/text()').get(),
-            'name': response.xpath('//td[contains(text(), "Compound")]/following-sibling::td[1]/text()').get(),
-            'qt_list': qt_list,
-            'unit_list': unit_list,
-            'currency_list': currency_list,
-            'price_pack_list': price_pack_list,
-        }
+            tr_tags = response.xpath('//tr[.//span[contains(text(), "Please enter Qty to check availability")]]')
+            for _ in tr_tags:
+                qt_and_unit = response.xpath(f'//span[@id="su{n}"]/text()').get().split('/')
+                currency = response.xpath('//td[contains(text(), "Price")]/text()').get().split('(')[-1].replace(')', '')
+                price = response.xpath(f'//input[@id="UnitPrice{n}"]/@value').get()
+                qt_list.append(qt_and_unit[0])
+                unit_list.append(qt_and_unit[1])
+                currency_list.append(currency)
+                price_pack_list.append(price)
+                n += 1
+
+            yield {
+                'datetime': datetime.datetime.now(),
+                'availability': True if availability else False,
+                'company_name': 'AstaTech',
+                'product_url': response.url,
+                'numcas': numcas,
+                'name': response.xpath('//td[contains(text(), "Compound")]/following-sibling::td[1]/text()').get().strip(),
+                'qt_list': qt_list,
+                'unit_list': unit_list,
+                'currency_list': currency_list,
+                'price_pack_list': price_pack_list,
+            }
+        except Exception:
+            return None
+
+    def get_all_pages(self, driver, categories_urls):
+        all_pages = []
+        for category in categories_urls:
+            driver.get(category)
+
+            contain_products = True
+            while contain_products:
+                table_element = driver.find_element(By.XPATH,
+                                                    "//table[@style='table-layout:fixed; margin-top:0px; border:1px solid #CCC;' and @width='552px']")
+                number_of_products = table_element.find_elements(By.XPATH, ".//div")
+                next_page = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div[5]/table[2]/tbody/tr/td[3]/a')
+                all_pages.append(driver.current_url)
+                if len(number_of_products) == 12:
+                    driver.execute_script("arguments[0].click();", next_page)
+                else:
+                    contain_products = False
+        return all_pages
+
+    def closed(self,):
+        self.driver.quit()
