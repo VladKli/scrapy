@@ -7,8 +7,12 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from dotenv import dotenv_values
-env_vars = dotenv_values('.env')
+import os
+from os.path import abspath, join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = abspath(join(dirname(__file__), '..', '..', '.env'))
+load_dotenv(dotenv_path)
 
 
 BOT_NAME = "chemicals"
@@ -97,8 +101,8 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-POSTGRES_HOST = env_vars.get('POSTGRES_HOST')
-POSTGRES_PORT = env_vars.get('POSTGRES_PORT')
-POSTGRES_DB = env_vars.get('POSTGRES_DB')
-POSTGRES_USER = env_vars.get('POSTGRES_USER')
-POSTGRES_PASSWORD = env_vars.get('POSTGRES_PASSWORD')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT')
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')

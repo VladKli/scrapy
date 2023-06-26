@@ -4,6 +4,9 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Chemicals(models.Model):
+    """
+    Model representing chemicals information.
+    """
     datetime = models.DateTimeField(default=timezone.now)
     availability = models.BooleanField(default=False)
     company_name = models.CharField(max_length=255)
@@ -15,5 +18,14 @@ class Chemicals(models.Model):
     currency_list = ArrayField(models.CharField())
     price_pack_list = ArrayField(models.CharField())
 
+    class Meta:
+        """
+        Meta class for specifying model options.
+        """
+        ordering = ['-datetime']
+
     def __str__(self):
+        """
+        String representation of the Chemicals object.
+        """
         return self.name

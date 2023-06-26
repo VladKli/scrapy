@@ -6,7 +6,19 @@ import requests
 
 
 class ChemicalsListAPIView(APIView):
+    """
+    API view for retrieving a list of Chemicals based on CAS number.
+    """
     def get(self, request):
+        """
+        Handle GET request to retrieve Chemicals based on CAS number.
+
+        Args:
+            request: The GET request object.
+
+        Returns:
+            A JSON response containing the Chemicals data or an error message.
+        """
         numcas = request.query_params.get("numcas")
 
         if not numcas:
@@ -23,8 +35,27 @@ class ChemicalsListAPIView(APIView):
 
 
 class AveragePriceView(APIView):
-    def get(self, request, cas_number):
-        chemicals = Chemicals.objects.filter(numcas=cas_number)
+    """
+    API view for calculating the average price of Chemicals based on CAS number.
+    """
+    def get(self, request):
+        """
+        Handle GET request to calculate the average price of Chemicals based on CAS number.
+
+        Args:
+            request: The GET request object.
+            cas_number (str): The CAS number of the Chemicals.
+
+        Returns:
+            A JSON response containing the average prices.
+        """
+
+        numcas = request.query_params.get("numcas")
+
+        if not numcas:
+            return JsonResponse({"error": "No CAS number provided."}, status=400)
+
+        chemicals = Chemicals.objects.filter(numcas=numcas)
 
         if not chemicals:
             return JsonResponse(
@@ -83,7 +114,19 @@ class AveragePriceView(APIView):
 
 
 class CompanySpiderAPIView(APIView):
+    """
+    API view for launching a spider to collect products for a specific company.
+    """
     def post(self, request):
+        """
+        Handle POST request to launch a spider for a specific company and collect products.
+
+        Args:
+            request: The POST request object.
+
+        Returns:
+            A JSON response indicating the success or failure of the spider launch.
+        """
         company_name = request.query_params.get("company_name")
 
         if not company_name:
@@ -93,10 +136,8 @@ class CompanySpiderAPIView(APIView):
             "AstaTech": "astatechinc_com",
         }
 
-        # Удаление существующих продуктов для данной компании
         Chemicals.objects.filter(company_name=company_name).delete()
 
-        # Запуск спайдера для сбора продуктов
         spider_url = "http://localhost:6800/schedule.json"
         data = {
             "project": "chemicals",

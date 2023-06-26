@@ -14,10 +14,6 @@ from chemicals.settings import (
 )
 
 
-# useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
-
-
 class ChemicalsPipeline:
     def process_item(self, item, spider):
         """Process the scraped item.

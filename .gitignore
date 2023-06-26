@@ -11,6 +11,11 @@ static/
 .scrapy/
 .scrapyrc
 scrapy.cfg
+scrapyd_env.py
+eggs/
+logs/
+dbs/
+
 
 # Virtual environment
 venv/

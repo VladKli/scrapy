@@ -69,6 +69,9 @@ class AstatechincComSpider(scrapy.Spider):
             try:
                 driver.execute_script("arguments[0].click();", base_div)
             except TimeoutException:
+                self.logger.error(
+                    "Timeout occurred while loading the page: %s", driver.current_url
+                )
                 continue
             submenu_span = base_div.find_element(By.XPATH, "./following-sibling::span")
             a_tags = submenu_span.find_elements(By.XPATH, ".//a")
@@ -128,6 +131,9 @@ class AstatechincComSpider(scrapy.Spider):
             driver.execute_script("arguments[0].click();", sub_category)
             return driver.current_url
         except TimeoutException:
+            self.logger.error(
+                "Timeout occurred while loading the page: %s", driver.current_url
+            )
             return driver.current_url
 
     def parse(self, response):
@@ -267,6 +273,9 @@ class AstatechincComSpider(scrapy.Spider):
                     try:
                         driver.execute_script("arguments[0].click();", next_page)
                     except TimeoutException:
+                        self.logger.error(
+                            "Timeout occurred while loading the page: %s", driver.current_url
+                        )
                         continue
                 else:
                     contain_products = False
@@ -286,17 +295,20 @@ class AstatechincComSpider(scrapy.Spider):
             Returns:
                 bool: True if the product is available, False otherwise.
             """
-        qty_inputs = self.second_driver.find_elements(By.XPATH, "//input[@value=0]")
+        qty_inputs = driver.find_elements(By.XPATH, "//input[@value=0]")
         for qty_input in qty_inputs:
             qty_input.clear()
             qty_input.send_keys("1")
             try:
-                is_available = WebDriverWait(driver, 10).until(
+                is_available = WebDriverWait(driver, 6).until(
                     EC.visibility_of_element_located(
-                        (By.XPATH, '//span[contains(text(), "in stock")]')
+                        (By.XPATH, '//span[contains(text(), "in stock") or contains(text(), "in China stock")]')
                     )
                 )
             except TimeoutException:
+                self.logger.error(
+                    "Timeout occurred while loading the page: %s", driver.current_url
+                )
                 continue
             if is_available:
                 return True
