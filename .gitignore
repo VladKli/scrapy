@@ -15,7 +15,7 @@ scrapyd_env.py
 eggs/
 logs/
 dbs/
-
+twistd.pid
 
 # Virtual environment
 venv/
