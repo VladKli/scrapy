@@ -20,14 +20,30 @@ from itemadapter import ItemAdapter
 
 class ChemicalsPipeline:
     def process_item(self, item, spider):
-        # Limit the size of the last four attributes to 5 elements
+        """Process the scraped item.
+
+        This function is called for each scraped item. It processes the item by limiting
+        the size of certain attributes to 5 elements, removing non-numeric elements from
+        'qt_list' and corresponding elements from 'unit_list', 'currency_list', and
+        'price_pack_list', and filtering the 'unit_list' based on a specified list of
+        valid units. If the resulting 'qt_list' is empty, the item is discarded by raising
+        a `DropItem` exception.
+
+        Args:
+            item (scrapy.Item): The scraped item to be processed.
+            spider (scrapy.Spider): The Spider instance that generated the item.
+
+        Returns:
+            scrapy.Item: The processed item.
+
+        Raises:
+            DropItem: If the 'qt_list' is empty after processing.
+        """
         item["qt_list"] = item["qt_list"][:5]
         item["unit_list"] = item["unit_list"][:5]
         item["currency_list"] = item["currency_list"][:5]
         item["price_pack_list"] = item["price_pack_list"][:5]
 
-        # Remove non-numeric elements from 'qt_list' and corresponding elements
-        # from 'unit_list', 'currency_list', and 'price_pack_list'
         qt_list = []
         unit_list = []
         currency_list = []
@@ -50,7 +66,6 @@ class ChemicalsPipeline:
         item["currency_list"] = currency_list
         item["price_pack_list"] = price_pack_list
 
-        # # Remove elements from 'unit_list' that are not in the specified list
         valid_units = ["mg", "g", "kg", "ml", "l"]
         filtered_unit_list = []
         filtered_qt_list = []
@@ -72,16 +87,20 @@ class ChemicalsPipeline:
         item["currency_list"] = filtered_currency_list
         item["price_pack_list"] = filtered_price_pack_list
 
-        # Check if there are any elements left after filtering
         if not item["qt_list"]:
             raise DropItem("Item discarded due to empty 'qt_list'")
 
-        # Return the processed item
         return item
 
 
 class PostgreSQLPipeline:
     def __init__(self):
+        """Initialize the Spider.
+
+           This method is called when the Spider instance is created. It establishes a connection
+           to the PostgreSQL database using the provided connection details (host, port, dbname,
+           user, password), and creates a cursor object to perform database operations.
+        """
         self.conn = psycopg2.connect(
             host=POSTGRES_HOST,
             port=POSTGRES_PORT,
@@ -92,6 +111,24 @@ class PostgreSQLPipeline:
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
+        """Process the scraped item.
+
+        This function is called for each scraped item. It processes the item by inserting
+        its data into a PostgreSQL database table named 'scrapy_app_chemicals'. The item
+        data is inserted into the table using an SQL INSERT statement. If any error occurs
+        during the database operation, the transaction is rolled back and a `DropItem`
+        exception is raised.
+
+        Args:
+            item (scrapy.Item): The scraped item to be processed.
+            spider (scrapy.Spider): The Spider instance that generated the item.
+
+        Returns:
+            scrapy.Item: The processed item.
+
+        Raises:
+            DropItem: If an error occurs during the database operation.
+        """
         try:
             self.cursor.execute(
                 "INSERT INTO scrapy_app_chemicals (datetime, availability, company_name, product_url, numcas, name, "
@@ -117,5 +154,13 @@ class PostgreSQLPipeline:
         return item
 
     def close_spider(self, spider):
+        """Close the Spider.
+
+        This method is called when the Spider is closed. It is responsible for closing
+        the database connection and cursor.
+
+        Args:
+            spider (scrapy.Spider): The Spider instance being closed.
+        """
         self.cursor.close()
         self.conn.close()

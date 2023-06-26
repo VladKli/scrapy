@@ -11,6 +11,12 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 class AstatechincComSpider(scrapy.Spider):
+    """Spider for crawling the astatechinc.com website.
+
+        This Spider is responsible for crawling the astatechinc.com website to extract chemical
+        information. It uses Selenium to interact with the website and Scrapy to handle the crawling
+        logic.
+    """
 
     name = "astatechinc_com"
     allowed_domains = ["astatechinc.com"]
@@ -20,10 +26,29 @@ class AstatechincComSpider(scrapy.Spider):
     second_driver = get_selenium_driver(page_load_strategy=True)
 
     def __init__(self, *args, **kwargs):
+        """Initialize the Spider instance.
+
+        This method is called when the Spider instance is created. It calls the
+        superclass's __init__ method and sets the start_urls attribute to the list
+        of start URLs obtained from the get_start_urls method.
+        """
         super(AstatechincComSpider, self).__init__(*args, **kwargs)
         self.start_urls = self.get_start_urls()
 
     def get_start_urls(self):
+        """Collects and returns the start URLs for the Spider.
+
+            This function retrieves the start URLs by scraping the website's categories
+            and subcategories using a Selenium WebDriver. It visits the base URL, extracts
+            the categories' names, and collects their corresponding URLs. It also handles
+            another type of categories and adds their URLs to the final list.
+
+            Returns:
+                list: A list of URLs representing the start URLs for the Spider.
+
+            Raises:
+                TimeoutException: If a timeout occurs while loading a page.
+            """
         categories_names = []
         another_categories = []
         categories_urls = []
@@ -74,6 +99,23 @@ class AstatechincComSpider(scrapy.Spider):
         return categories_urls
 
     def get_subcategory_url(self, driver, category_name, sub_category_name):
+        """Retrieve the URL of a specific subcategory.
+
+            This function takes a Selenium WebDriver instance, the name of a category, and the name
+            of a subcategory. It navigates to the website's base URL, clicks on the specified category,
+            clicks on the specified subcategory, and returns the URL of the subcategory page.
+
+            Args:
+                driver (WebDriver): An instance of the Selenium WebDriver.
+                category_name (str): The name of the category containing the desired subcategory.
+                sub_category_name (str): The name of the subcategory for which to retrieve the URL.
+
+            Returns:
+                str: The URL of the subcategory page.
+
+            Raises:
+                TimeoutException: If a timeout occurs while loading a page.
+            """
         try:
             driver.get(self.base_url)
             category = driver.find_element(
@@ -89,6 +131,20 @@ class AstatechincComSpider(scrapy.Spider):
             return driver.current_url
 
     def parse(self, response):
+        """Parse the main page response and extract links to be processed.
+
+            This function is the main parsing method for the Spider. It receives the
+            response from the main page and extracts the desired links from the HTML
+            table using XPath selectors. For each link, it creates a Scrapy `Request`
+            object with the URL and a callback function `parse_link` to process the
+            link further.
+
+            Args:
+                response (scrapy.http.Response): The response object of the main page.
+
+            Yields:
+                scrapy.Request: A Scrapy `Request` object representing a link to be processed.
+            """
         table = response.xpath("/html/body/div[9]/div[2]/div[5]/table[1]")
         a_tags = table.xpath(".//a")
 
@@ -97,6 +153,20 @@ class AstatechincComSpider(scrapy.Spider):
             yield scrapy.Request(url=href, callback=self.parse_link)
 
     def parse_link(self, response):
+        """Parse the individual link page response and extract the desired data.
+
+            This function is responsible for parsing the response of an individual link page.
+            It uses XPath selectors to extract the required data from the HTML response. The
+            extracted data includes information such as CAS number, availability, quantities,
+            units, currency, and price. The function yields a dictionary containing the extracted
+            data as a Scrapy `Item` to be further processed or stored.
+
+            Args:
+                response (scrapy.http.Response): The response object of the link page.
+
+            Yields:
+                dict: A dictionary containing the extracted data as a Scrapy `Item`.
+            """
         qt_list = []
         unit_list = []
         currency_list = []
@@ -163,6 +233,20 @@ class AstatechincComSpider(scrapy.Spider):
             return None
 
     def get_all_pages(self, driver, categories_urls):
+        """Retrieve all the pages for each category.
+
+           This function takes a Selenium WebDriver instance and a list of category URLs.
+           It navigates to each category URL, iterates through the pages within the category,
+           and collects the URLs of all the pages. The function returns a list containing all
+           the collected page URLs.
+
+           Args:
+               driver (WebDriver): An instance of the Selenium WebDriver.
+               categories_urls (list): A list of category URLs.
+
+           Returns:
+               list: A list of all the collected page URLs.
+           """
         all_pages = []
         for category in categories_urls:
             driver.get(category)
@@ -189,6 +273,19 @@ class AstatechincComSpider(scrapy.Spider):
         return all_pages
 
     def get_availability(self, driver):
+        """Check the availability of a product.
+
+            This function takes a Selenium WebDriver instance and checks the availability
+            of a product by filling the quantity input fields with a value of 1 and waiting
+            for the "in stock" message to be visible. If the product is available, it returns
+            True. Otherwise, it returns False.
+
+            Args:
+                driver (WebDriver): An instance of the Selenium WebDriver.
+
+            Returns:
+                bool: True if the product is available, False otherwise.
+            """
         qty_inputs = self.second_driver.find_elements(By.XPATH, "//input[@value=0]")
         for qty_input in qty_inputs:
             qty_input.clear()
@@ -206,7 +303,16 @@ class AstatechincComSpider(scrapy.Spider):
         return False
 
     def spider_closed(self, spider):
-        # Close the WebDriver
+        """Callback function called when the spider is closed.
+
+            This function is called when the spider is being closed. It is responsible for
+            performing cleanup tasks, such as closing the WebDriver. If the `second_driver`
+            instance exists, it is closed by calling the `quit()` method. The function also
+            logs a message to indicate that all links have been processed.
+
+            Args:
+                spider (scrapy.Spider): The Spider instance being closed.
+            """
         if self.second_driver:
             self.second_driver.quit()
         self.logger.info("Finished processing all links!")

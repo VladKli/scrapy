@@ -1,0 +1,28 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+media/
+static/
+*.env
+
+# Scrapy
+.scrapy/
+.scrapyrc
+scrapy.cfg
+
+# Virtual environment
+venv/
+env/
+.env
+
+# PyCharm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Project-specific files (adjust as needed)
+settings.ini
+config.ini

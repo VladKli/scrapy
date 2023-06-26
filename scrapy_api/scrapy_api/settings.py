@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import dotenv_values
+env_vars = dotenv_values('.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,11 +80,11 @@ WSGI_APPLICATION = "scrapy_api.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "scrapy_test",
-        "USER": "admin",
-        "PASSWORD": "admin",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": env_vars.get('POSTGRES_DB'),
+        "USER": env_vars.get('POSTGRES_USER'),
+        "PASSWORD": env_vars.get('POSTGRES_PASSWORD'),
+        "HOST": env_vars.get('POSTGRES_HOST'),
+        "PORT": env_vars.get('POSTGRES_PORT'),
     }
 }
 
