@@ -12,9 +12,9 @@ static/
 .scrapyrc
 scrapy.cfg
 scrapyd_env.py
-eggs/
-logs/
-dbs/
+/eggs/
+/logs/
+/dbs/
 
 
 # Virtual environment
