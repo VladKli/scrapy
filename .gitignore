@@ -19,6 +19,7 @@ env/
 
 # PyCharm
 .idea/
+.idea
 *.iml
 *.ipr
 *.iws
