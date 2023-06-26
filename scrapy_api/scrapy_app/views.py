@@ -28,10 +28,12 @@ class ChemicalsListAPIView(APIView):
 
         if not queryset:
             return JsonResponse(
-                {"error": "No data found for the given CAS number."}, status=404
+                {"error": "No data found for the given CAS number."},
+                status=404
             )
 
-        return JsonResponse({"data": ChemicalsSerializer(queryset, many=True).data})
+        data = ChemicalsSerializer(queryset, many=True).data
+        return JsonResponse({"data": data})
 
 
 class AveragePriceView(APIView):
