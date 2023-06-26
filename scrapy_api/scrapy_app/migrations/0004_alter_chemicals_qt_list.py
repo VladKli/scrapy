@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scrapy_app', '0003_rename_product_chemicals'),
+        ("scrapy_app", "0003_rename_product_chemicals"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='chemicals',
-            name='qt_list',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.FloatField(), size=None),
+            model_name="chemicals",
+            name="qt_list",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.FloatField(), size=None
+            ),
         ),
     ]

@@ -6,27 +6,53 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Product',
+            name="Product",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('datetime', models.DateTimeField(default=django.utils.timezone.now)),
-                ('availability', models.BooleanField(default=False)),
-                ('company_name', models.CharField(max_length=255)),
-                ('product_url', models.URLField()),
-                ('numcas', models.CharField(max_length=255)),
-                ('name', models.CharField(max_length=255)),
-                ('qt_list', django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), size=None)),
-                ('unit_list', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(), size=None)),
-                ('currency_list', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(), size=None)),
-                ('price_pack_list', django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), size=None)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("datetime", models.DateTimeField(default=django.utils.timezone.now)),
+                ("availability", models.BooleanField(default=False)),
+                ("company_name", models.CharField(max_length=255)),
+                ("product_url", models.URLField()),
+                ("numcas", models.CharField(max_length=255)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "qt_list",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.IntegerField(), size=None
+                    ),
+                ),
+                (
+                    "unit_list",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(), size=None
+                    ),
+                ),
+                (
+                    "currency_list",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(), size=None
+                    ),
+                ),
+                (
+                    "price_pack_list",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.IntegerField(), size=None
+                    ),
+                ),
             ],
         ),
     ]

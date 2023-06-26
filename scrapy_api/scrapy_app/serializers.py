@@ -5,10 +5,10 @@ from .models import Chemicals
 class ChemicalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chemicals
-        fields = '__all__'
+        fields = "__all__"
 
 
 class AvgChemicalsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chemicals
-        fields = '__all__'
+        fields = "__all__"

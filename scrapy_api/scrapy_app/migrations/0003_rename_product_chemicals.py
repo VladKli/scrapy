@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scrapy_app', '0002_alter_product_price_pack_list_and_more'),
+        ("scrapy_app", "0002_alter_product_price_pack_list_and_more"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Product',
-            new_name='Chemicals',
+            old_name="Product",
+            new_name="Chemicals",
         ),
     ]

@@ -17,5 +17,5 @@ Including another URLconf
 from django.urls import include, path
 
 urlpatterns = [
-    path('chemicals/', include('scrapy_app.urls')),
+    path("chemicals/", include("scrapy_app.urls")),
 ]
