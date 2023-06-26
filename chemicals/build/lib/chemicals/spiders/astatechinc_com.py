@@ -40,7 +40,10 @@ class AstatechincComSpider(scrapy.Spider):
 
         for el in categories_names:
             base_div = driver.find_element(By.XPATH, f"//div[contains(text(), '{el}')]")
-            driver.execute_script("arguments[0].click();", base_div)
+            try:
+                driver.execute_script("arguments[0].click();", base_div)
+            except TimeoutException:
+                continue
             submenu_span = base_div.find_element(By.XPATH, "./following-sibling::span")
             a_tags = submenu_span.find_elements(By.XPATH, ".//a")
             a_tag_texts = [a_tag.text for a_tag in a_tags]
@@ -56,9 +59,9 @@ class AstatechincComSpider(scrapy.Spider):
                 self.logger.error("Timeout occurred while loading the page: %s", driver.current_url)
                 return None
 
-        all_pages = self.get_all_pages(driver, categories_urls)
-
-        categories_urls = list(set(categories_urls + all_pages))
+        # all_pages = self.get_all_pages(driver, categories_urls)
+        #
+        # categories_urls = list(set(categories_urls + all_pages))
 
         driver.quit()
 
@@ -147,7 +150,10 @@ class AstatechincComSpider(scrapy.Spider):
                 next_page = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div[5]/table[2]/tbody/tr/td[3]/a')
                 all_pages.append(driver.current_url)
                 if len(number_of_products) == 12:
-                    driver.execute_script("arguments[0].click();", next_page)
+                    try:
+                        driver.execute_script("arguments[0].click();", next_page)
+                    except TimeoutException:
+                        continue
                 else:
                     contain_products = False
         return all_pages

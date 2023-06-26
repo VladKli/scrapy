@@ -80,7 +80,7 @@ class PostgreSQLPipeline:
     def process_item(self, item, spider):
         try:
             self.cursor.execute(
-                "INSERT INTO scrapy_app_product (datetime, availability, company_name, product_url, numcas, name, "
+                "INSERT INTO scrapy_app_chemicals (datetime, availability, company_name, product_url, numcas, name, "
                 "qt_list, unit_list, currency_list, price_pack_list) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
