@@ -16,3 +16,6 @@ chemicals/?numcas=71884-56-5 - to get info about chemicals with specific cas num
 chemicals/avg/?numcas=71884-56-5 - to get an average price for 1g/ml of a chemical
 
 chemicals/run/?company_name=AstaTech - to run a spider providing campaign name
+
+<h3>run tests:</h3>
+python manage.py test
