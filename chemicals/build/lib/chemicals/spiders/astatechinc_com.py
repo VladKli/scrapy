@@ -1,6 +1,5 @@
 import datetime
 
-from selenium import webdriver
 import scrapy
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
@@ -92,13 +91,12 @@ class AstatechincComSpider(scrapy.Spider):
                 )
                 return None
 
-        # all_pages = self.get_all_pages(driver, categories_urls)
-        #
-        # categories_urls = list(set(categories_urls + all_pages))
+        all_pages = self.get_all_pages(driver, categories_urls)
+
+        categories_urls = list(set(categories_urls + all_pages))
 
         driver.quit()
 
-        # Return the collected links as start URLs for the Spider
         return categories_urls
 
     def get_subcategory_url(self, driver, category_name, sub_category_name):
