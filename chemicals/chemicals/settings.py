@@ -55,11 +55,14 @@ ROBOTSTXT_OBEY = True
 #    "chemicals.middlewares.ChemicalsSpiderMiddleware": 543,
 # }
 
+
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "chemicals.middlewares.ChemicalsDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "chemicals.middlewares.ChemicalsDownloaderMiddleware": 543,
+    "chemicals.middlewares.ProxyMiddleware": 500,
+
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -106,3 +109,7 @@ POSTGRES_PORT = os.getenv('POSTGRES_PORT')
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 POSTGRES_USER = os.getenv('POSTGRES_USER')
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+
+PROXY_HOST = os.getenv('PROXY_HOST')
+PROXY_USERNAME = os.getenv('PROXY_USERNAME')
+PROXY_PASSWORD = os.getenv('PROXY_PASSWORD')

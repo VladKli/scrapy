@@ -5,6 +5,12 @@
 
 from scrapy import signals
 
+from chemicals.settings import (
+    PROXY_HOST,
+    PROXY_USERNAME,
+    PROXY_PASSWORD,
+)
+
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
@@ -101,3 +107,20 @@ class ChemicalsDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+
+
+class ProxyMiddleware:
+    def __init__(self, host, username, password):
+        self.host = host
+        self.username = username
+        self.password = password
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        host = PROXY_HOST
+        username = PROXY_USERNAME
+        password = PROXY_PASSWORD
+        return cls(host, username, password)
+
+    def process_request(self, request, spider):
+        request.meta['proxy'] = f'http://{self.username}:{self.password}@{self.host}'
