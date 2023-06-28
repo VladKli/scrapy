@@ -3,7 +3,9 @@ from rest_framework.views import APIView
 from .models import Chemicals
 from .serializers import ChemicalsSerializer
 import requests
-
+from django.db.models import Case, FloatField, F, Value, When
+from django.db.models.functions import Cast, Coalesce
+from django.db.models.aggregates import Avg
 
 class ChemicalsListAPIView(APIView):
     """
@@ -65,54 +67,33 @@ class AveragePriceView(APIView):
                 {"error": "No data found for the given CAS number."}, status=404
             )
 
-        total_price_g = 0
-        total_quantity_g = 0
-        total_price_ml = 0
-        total_quantity_ml = 0
-
-        for chemical in chemicals:
-            qt_list = chemical.qt_list
-            unit_list = chemical.unit_list
-            price_pack_list = chemical.price_pack_list
-
-            if not qt_list or not unit_list or not price_pack_list:
-                continue
-
-            for qt, unit, price in zip(qt_list, unit_list, price_pack_list):
-                if unit == "mg":
-                    qt = qt / 1000
-                    unit = "g"
-                elif unit == "kg":
-                    qt = qt * 1000
-                    unit = "g"
-                elif unit == "ml":
-                    qt = qt
-                    unit = "ml"
-                elif unit == "l":
-                    qt = qt * 1000
-                    unit = "ml"
-
-                if unit == "g":
-                    total_price_g += float(price)
-                    total_quantity_g += float(qt)
-                elif unit == "ml":
-                    total_price_ml += float(price)
-                    total_quantity_ml += float(qt)
-
-        if total_quantity_g == 0 and total_quantity_ml == 0:
-            return JsonResponse(
-                {"error": "No valid data found for the given CAS number."}, status=404
+        average_price_per_gram = (
+            chemicals
+            .annotate(
+                price_per_gram=Case(
+                    When(
+                        unit_list__0='mg',
+                        then=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / (
+                                    Coalesce(Cast(F('qt_list__0'), FloatField()), Value(1.0)) * 0.001)
+                    ),
+                    When(
+                        unit_list__0='kg',
+                        then=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / (
+                                    Coalesce(Cast(F('qt_list__0'), FloatField()), Value(1.0)) * 1000)
+                    ),
+                    default=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / Coalesce(
+                        Cast(F('qt_list__0'), FloatField()), Value(1.0)),
+                    output_field=FloatField()
+                )
             )
+            .filter(currency_list__0='$')
+            .aggregate(average_price=Avg('price_per_gram'))
+        )
 
-        average_price_g = (
-            total_price_g / total_quantity_g if total_quantity_g != 0 else 0
-        )
-        average_price_ml = (
-            total_price_ml / total_quantity_ml if total_quantity_ml != 0 else 0
-        )
+        average_price = average_price_per_gram['average_price']
 
         return JsonResponse(
-            {"average_price_g": average_price_g, "average_price_ml": average_price_ml}
+            {"average_price_g": average_price}
         )
 
 
