@@ -17,6 +17,12 @@ class AstatechincComSpider(scrapy.Spider):
         """
         Parses the initial response and extracts category names.
         Sends requests to parse each category separately.
+
+        Args:
+            response: The response object.
+
+        Yields:
+            Request objects to parse each category separately.
         """
         categories_tags = response.xpath('//a[contains(@onclick, "TTT")]')
         categories_names = [name.xpath("text()").get() for name in categories_tags]
@@ -30,6 +36,12 @@ class AstatechincComSpider(scrapy.Spider):
         Parses the category page and extracts chemical URLs.
         Sends requests to get the redirect links for each chemical.
         If there are more pages, sends request to the next page of the category.
+
+        Args:
+            response: The response object.
+
+        Yields:
+            Request objects to get the redirect links for each chemical.
         """
         chemicals = response.xpath('//a[contains(@href, "cat=")]')
         for chemical in chemicals:
@@ -46,6 +58,12 @@ class AstatechincComSpider(scrapy.Spider):
     def get_redirect_link(self, response):
         """
         Extracts the redirect link and sends a request to parse the chemical details.
+
+        Args:
+            response: The response object.
+
+        Yields:
+            Request object to parse the chemical details.
         """
         url = response.text.split("window.parent.location='")[1].split("'")[0]
         yield scrapy.Request(self.domain + url, callback=self.parse_chemical)
@@ -53,7 +71,12 @@ class AstatechincComSpider(scrapy.Spider):
     def check_if_last_page(self, response):
         """
         Checks if the current page is the last page in the category.
-        Returns True if it's not the last page, False otherwise.
+
+        Args:
+            response: The response object.
+
+        Returns:
+            True if it's not the last page, False otherwise.
         """
         pages = response.xpath(
             '//span[@style="margin-right:0.3em;"]/following-sibling::text()'
@@ -65,7 +88,12 @@ class AstatechincComSpider(scrapy.Spider):
     def get_availability_urls(self, response):
         """
         Extracts the availability URLs for each chemical.
-        Returns a list of URLs.
+
+        Args:
+            response: The response object.
+
+        Returns:
+            A list of URLs.
         """
         n = 1
         urls = []
@@ -84,6 +112,12 @@ class AstatechincComSpider(scrapy.Spider):
         """
         Parses the chemical details page and yields the extracted data.
         Sends requests to check the availability of the chemical.
+
+        Args:
+            response: The response object.
+
+        Yields:
+            Item object with the extracted data.
         """
         qt_list = []
         unit_list = []
@@ -140,6 +174,13 @@ class AstatechincComSpider(scrapy.Spider):
         """
         Processes additional requests to check the availability of the chemical.
         Yields the item with updated availability information.
+
+        Args:
+            urls: List of availability URLs.
+            item: The item object.
+
+        Yields:
+            Request objects to check the availability of the chemical.
         """
         if not urls:
             if True in item["availability"]:
@@ -161,6 +202,12 @@ class AstatechincComSpider(scrapy.Spider):
         """
         Extracts availability information from the response and updates the item.
         Sends requests for remaining availability URLs.
+
+        Args:
+            response: The response object.
+
+        Yields:
+            Request objects for remaining availability URLs.
         """
         item = response.meta["item"]
 
