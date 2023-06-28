@@ -123,4 +123,4 @@ class ProxyMiddleware:
         return cls(host, username, password)
 
     def process_request(self, request, spider):
-        request.meta['proxy'] = f'http://{self.username}:{self.password}@{self.host}'
+        request.meta["proxy"] = f"http://{self.username}:{self.password}@{self.host}"

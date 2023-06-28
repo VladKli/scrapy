@@ -93,9 +93,9 @@ class PostgreSQLPipeline:
     def __init__(self):
         """Initialize the Spider.
 
-           This method is called when the Spider instance is created. It establishes a connection
-           to the PostgreSQL database using the provided connection details (host, port, dbname,
-           user, password), and creates a cursor object to perform database operations.
+        This method is called when the Spider instance is created. It establishes a connection
+        to the PostgreSQL database using the provided connection details (host, port, dbname,
+        user, password), and creates a cursor object to perform database operations.
         """
         self.conn = psycopg2.connect(
             host=POSTGRES_HOST,

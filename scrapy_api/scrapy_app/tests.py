@@ -11,7 +11,6 @@ class ChemicalsListAPIViewTestCase(TestCase):
         self.url = reverse("chemicals-list")
         self.numcas = "12345"
 
-
         Chemicals.objects.create(
             availability=True,
             company_name="Company A",
@@ -33,7 +32,9 @@ class ChemicalsListAPIViewTestCase(TestCase):
     def test_get_chemicals_with_invalid_numcas(self):
         response = self.client.get(self.url, {"numcas": "00000"})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json()["error"], "No data found for the given CAS number.")
+        self.assertEqual(
+            response.json()["error"], "No data found for the given CAS number."
+        )
 
     def test_get_chemicals_without_numcas(self):
         response = self.client.get(self.url)
@@ -69,7 +70,9 @@ class AveragePriceViewTestCase(TestCase):
     def test_get_average_price_with_invalid_numcas(self):
         response = self.client.get(self.url, {"numcas": "00000"})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json()["error"], "No data found for the given CAS number.")
+        self.assertEqual(
+            response.json()["error"], "No data found for the given CAS number."
+        )
 
     def test_get_average_price_without_numcas(self):
         response = self.client.get(self.url)

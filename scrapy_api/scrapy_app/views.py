@@ -9,6 +9,7 @@ class ChemicalsListAPIView(APIView):
     """
     API view for retrieving a list of Chemicals based on CAS number.
     """
+
     def get(self, request):
         """
         Handle GET request to retrieve Chemicals based on CAS number.
@@ -28,8 +29,7 @@ class ChemicalsListAPIView(APIView):
 
         if not queryset:
             return JsonResponse(
-                {"error": "No data found for the given CAS number."},
-                status=404
+                {"error": "No data found for the given CAS number."}, status=404
             )
 
         data = ChemicalsSerializer(queryset, many=True).data
@@ -40,6 +40,7 @@ class AveragePriceView(APIView):
     """
     API view for calculating the average price of Chemicals based on CAS number.
     """
+
     def get(self, request):
         """
         Handle GET request to calculate the average price of Chemicals based on CAS number.
@@ -119,6 +120,7 @@ class CompanySpiderAPIView(APIView):
     """
     API view for launching a spider to collect products for a specific company.
     """
+
     def post(self, request):
         """
         Handle POST request to launch a spider for a specific company and collect products.
