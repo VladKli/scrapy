@@ -11,7 +11,7 @@ import os
 from os.path import abspath, join, dirname
 from dotenv import load_dotenv
 
-dotenv_path = abspath(join(dirname(__file__), '..', '..', '.env'))
+dotenv_path = abspath(join(dirname(__file__), "..", "..", ".env"))
 load_dotenv(dotenv_path)
 
 
@@ -55,11 +55,13 @@ ROBOTSTXT_OBEY = True
 #    "chemicals.middlewares.ChemicalsSpiderMiddleware": 543,
 # }
 
+
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    "chemicals.middlewares.ChemicalsDownloaderMiddleware": 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "chemicals.middlewares.ChemicalsDownloaderMiddleware": 543,
+    "chemicals.middlewares.ProxyMiddleware": 500,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -101,8 +103,12 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-POSTGRES_HOST = os.getenv('POSTGRES_HOST')
-POSTGRES_PORT = os.getenv('POSTGRES_PORT')
-POSTGRES_DB = os.getenv('POSTGRES_DB')
-POSTGRES_USER = os.getenv('POSTGRES_USER')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+
+PROXY_HOST = os.getenv("PROXY_HOST")
+PROXY_USERNAME = os.getenv("PROXY_USERNAME")
+PROXY_PASSWORD = os.getenv("PROXY_PASSWORD")

@@ -16,6 +16,9 @@ eggs/
 logs/
 dbs/
 twistd.pid
+SOURCES.txt
+chemicals/build/
+
 
 # Virtual environment
 venv/

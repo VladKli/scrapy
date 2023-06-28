@@ -1,6 +1,5 @@
 setup.py
 chemicals/__init__.py
-chemicals/driver.py
 chemicals/middlewares.py
 chemicals/pipelines.py
 chemicals/settings.py
