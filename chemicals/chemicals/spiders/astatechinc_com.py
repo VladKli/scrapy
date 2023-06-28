@@ -9,7 +9,6 @@ class AstatechincComSpider(scrapy.Spider):
 
     domain = "https://www.astatechinc.com/"
 
-
     def parse(self, response):
         categories_tags = response.xpath('//a[contains(@onclick, "TTT")]')
         categories_names = [name.xpath('text()').get() for name in categories_tags]
@@ -17,8 +16,6 @@ class AstatechincComSpider(scrapy.Spider):
         for name in categories_names:
             url = f"https://www.astatechinc.com/ConcordCatagory.php?CCatagory={name}"
             yield scrapy.Request(url, callback=self.parse_category)
-
-
 
     def parse_category(self, response):
 
@@ -36,6 +33,26 @@ class AstatechincComSpider(scrapy.Spider):
         url = response.text.split("window.parent.location='")[1].split("'")[0]
         yield scrapy.Request(self.domain + url, callback=self.parse_chemical)
 
+    def check_if_last_page(self, response):
+        pages = response.xpath('//span[@style="margin-right:0.3em;"]/following-sibling::text()').get()[2:-2].split(' of ')
+        current_page = pages[0]
+        last_page = pages[1]
+        if last_page != current_page:
+            return True
+        return False
+
+    def get_availability_urls(self, response):
+        n = 1
+        urls = []
+        all_units = response.xpath('//tr[.//span[contains(text(), "Please enter Qty to check availability")]]')
+        for unit in all_units:
+            catalog = response.css('#Catalog::text').get()
+            size = unit.css(f'#su{n}::text').get()
+            url = f"https://astatechinc.com/CGetInv.php?Catalog={catalog}&SUX={size}&QTY=1&QTYX={n}"
+            urls.append(url)
+            n += 1
+        return urls
+
     def parse_chemical(self, response):
 
         qt_list = []
@@ -50,7 +67,7 @@ class AstatechincComSpider(scrapy.Spider):
         if not numcas:
             return None
 
-        availability = self.get_availability_text(response)
+        availability_urls = self.get_availability_urls(response)
 
         tr_tags = response.xpath(
             '//tr[.//span[contains(text(), "Please enter Qty to check availability")]]'
@@ -72,9 +89,9 @@ class AstatechincComSpider(scrapy.Spider):
             price_pack_list.append(price)
             n += 1
 
-        yield {
+        item = {
             "datetime": datetime.now(),
-            "availability": True if availability else False,
+            "availability": [],
             "company_name": "AstaTech",
             "product_url": response.url,
             "numcas": numcas,
@@ -89,26 +106,30 @@ class AstatechincComSpider(scrapy.Spider):
             "price_pack_list": price_pack_list,
         }
 
-    def check_if_last_page(self, response):
-        pages = response.xpath('//span[@style="margin-right:0.3em;"]/following-sibling::text()').get()[2:-2].split(' of ')
-        current_page = pages[0]
-        last_page = pages[1]
-        if last_page != current_page:
-            return True
-        return False
+        yield from self.process_additional_requests(availability_urls, item)
 
-    def get_availability_text(self, response):
-        n = 1
+    def process_additional_requests(self, urls, item):
+        if not urls:
+            if True in item['availability']:
+                item['availability'] = True
+            else:
+                item['availability'] = False
 
-        all_units = response.xpath('//tr[.//span[contains(text(), "Please enter Qty to check availability")]]')
-        for unit in all_units:
-            catalog = response.css('#Catalog::text').get()
-            size = unit.css(f'#su{n}::text').get()
-            url = f"https://astatechinc.com/CGetInv.php?Catalog={catalog}&SUX={size}&QTY=1&QTYX={n}"
-            n += 1
-            yield scrapy.Request(url, callback=self.get_availability)
-            print('doo')
+            yield item
+        else:
+            url = urls[0]
+            remaining_urls = urls[1:]
+            yield scrapy.Request(url, callback=self.get_availability, meta={'urls': remaining_urls, 'item': item})
 
     def get_availability(self, response):
-            data = response
-            print('done')
+
+        item = response.meta['item']
+
+        if 'in stock' in response.text or 'in China stock' in response.text:
+            item['availability'].append(True)
+        else:
+            item['availability'].append(False)
+
+        remaining_urls = response.meta['urls']
+        yield from self.process_additional_requests(remaining_urls, item)
+
