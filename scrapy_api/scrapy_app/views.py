@@ -7,6 +7,7 @@ from django.db.models import Case, FloatField, F, Value, When
 from django.db.models.functions import Cast, Coalesce
 from django.db.models.aggregates import Avg
 
+
 class ChemicalsListAPIView(APIView):
     """
     API view for retrieving a list of Chemicals based on CAS number.
@@ -68,33 +69,42 @@ class AveragePriceView(APIView):
             )
 
         average_price_per_gram = (
-            chemicals
-            .annotate(
+            chemicals.annotate(
                 price_per_gram=Case(
                     When(
-                        unit_list__0='mg',
-                        then=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / (
-                                    Coalesce(Cast(F('qt_list__0'), FloatField()), Value(1.0)) * 0.001)
+                        unit_list__0="mg",
+                        then=Coalesce(
+                            Cast(F("price_pack_list__0"), FloatField()), Value(0.0)
+                        )
+                        / (
+                            Coalesce(Cast(F("qt_list__0"), FloatField()), Value(1.0))
+                            * 0.001
+                        ),
                     ),
                     When(
-                        unit_list__0='kg',
-                        then=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / (
-                                    Coalesce(Cast(F('qt_list__0'), FloatField()), Value(1.0)) * 1000)
+                        unit_list__0="kg",
+                        then=Coalesce(
+                            Cast(F("price_pack_list__0"), FloatField()), Value(0.0)
+                        )
+                        / (
+                            Coalesce(Cast(F("qt_list__0"), FloatField()), Value(1.0))
+                            * 1000
+                        ),
                     ),
-                    default=Coalesce(Cast(F('price_pack_list__0'), FloatField()), Value(0.0)) / Coalesce(
-                        Cast(F('qt_list__0'), FloatField()), Value(1.0)),
-                    output_field=FloatField()
+                    default=Coalesce(
+                        Cast(F("price_pack_list__0"), FloatField()), Value(0.0)
+                    )
+                    / Coalesce(Cast(F("qt_list__0"), FloatField()), Value(1.0)),
+                    output_field=FloatField(),
                 )
             )
-            .filter(currency_list__0='$')
-            .aggregate(average_price=Avg('price_per_gram'))
+            .filter(currency_list__0="$")
+            .aggregate(average_price=Avg("price_per_gram"))
         )
 
-        average_price = average_price_per_gram['average_price']
+        average_price = average_price_per_gram["average_price"]
 
-        return JsonResponse(
-            {"average_price_g": average_price}
-        )
+        return JsonResponse({"average_price_g": average_price})
 
 
 class CompanySpiderAPIView(APIView):
