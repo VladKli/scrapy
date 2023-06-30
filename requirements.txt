@@ -29,7 +29,7 @@ parsel==1.8.1
 pathspec==0.11.1
 platformdirs==3.8.0
 Protego==0.2.1
-psycopg2==2.9.6
+psycopg2-binary==2.9.6
 pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pycparser==2.21
@@ -43,7 +43,7 @@ requests==2.31.0
 requests-file==1.5.1
 Scrapy==2.9.0
 scrapyd==1.4.2
-scrapyd-client @ git+https://github.com/scrapy/scrapyd-client@10fdf9bb17d0d50b895404f9a5a5d59521d43f66
+scrapyd-client
 selenium==4.10.0
 service-identity==23.1.0
 six==1.16.0
