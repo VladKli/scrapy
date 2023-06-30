@@ -6,11 +6,11 @@ import datetime
 import psycopg2
 from scrapy.exceptions import DropItem
 from chemicals.settings import (
-    POSTGRES_HOST,
-    POSTGRES_PORT,
-    POSTGRES_DB,
-    POSTGRES_USER,
-    POSTGRES_PASSWORD,
+    DB_HOST,
+    DB_PORT,
+    DB_NAME,
+    DB_USER,
+    DB_PASSWORD,
 )
 
 
@@ -98,11 +98,11 @@ class PostgreSQLPipeline:
         user, password), and creates a cursor object to perform database operations.
         """
         self.conn = psycopg2.connect(
-            host=POSTGRES_HOST,
-            port=POSTGRES_PORT,
-            dbname=POSTGRES_DB,
-            user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
         )
         self.cursor = self.conn.cursor()
 
