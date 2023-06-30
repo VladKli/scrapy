@@ -1,3 +1,5 @@
+import os
+
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from .models import Chemicals
@@ -7,6 +9,8 @@ from django.db.models import Case, FloatField, F, Value, When
 from django.db.models.functions import Cast, Coalesce
 from django.db.models.aggregates import Avg
 
+
+SCRAPYD_HOST = os.environ.get('SCRAPYD_HOST')
 
 class ChemicalsListAPIView(APIView):
     """
@@ -133,7 +137,7 @@ class CompanySpiderAPIView(APIView):
 
         Chemicals.objects.filter(company_name=company_name).delete()
 
-        spider_url = "http://localhost:6800/schedule.json"
+        spider_url = f"http://{SCRAPYD_HOST}:6800/schedule.json"
         data = {
             "project": "chemicals",
             "spider": company_names[company_name],
