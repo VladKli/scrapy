@@ -103,12 +103,12 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-DB_HOST = os.getenv("POSTGRES_HOST")
-DB_PORT = os.getenv("POSTGRES_PORT")
-DB_NAME = os.getenv("POSTGRES_DB")
-DB_USER = os.getenv("POSTGRES_USER")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+DB_HOST = os.environ.get("POSTGRES_HOST")
+DB_PORT = os.environ.get("POSTGRES_PORT")
+DB_NAME = os.environ.get("POSTGRES_DB")
+DB_USER = os.environ.get("POSTGRES_USER")
+DB_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 
-PROXY_HOST = os.getenv("PROXY_HOST")
-PROXY_USERNAME = os.getenv("PROXY_USERNAME")
-PROXY_PASSWORD = os.getenv("PROXY_PASSWORD")
+PROXY_HOST = os.environ.get("PROXY_HOST")
+PROXY_USERNAME = os.environ.get("PROXY_USERNAME")
+PROXY_PASSWORD = os.environ.get("PROXY_PASSWORD")
